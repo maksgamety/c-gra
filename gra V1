@@ -1,0 +1,221 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Entity {
+private:
+    int health;
+    int max_health;
+    string name;
+    int damage;
+
+public:
+    Entity() : name("bezNazwy"), health(100), max_health(100), damage(10) {}
+
+    Entity(const string& name) : name(name), health(100), max_health(100), damage(10) {}
+
+    void lowerHealth(int amount) {
+        if (amount < 0) { amount *= -1; }
+        health -= amount;
+        if (health < 0) { health = 0; }
+    }
+
+    void addHealth(int amount) {
+        if (amount < 0) { amount *= -1; }
+        health += amount;
+        if (health > max_health) { health = max_health; }
+    }
+
+    string getName() const {
+        return name;
+    }
+
+    int getHealth() const {
+        return health;
+    }
+
+    int getMaxHealth() const {
+        return max_health;
+    }
+
+    int getDamage() const {
+        return damage;
+    }
+
+protected:
+    void addMaxHealth(int value) { max_health += value; }
+    void addDamage(int value) { damage += value; }
+};
+
+class Player : public Entity {
+private:
+    int metal;
+    int oxygen;
+    int experience;
+    int dmgPrice = 10;
+    int hpPrice = 10;
+
+public:
+    Player() : Entity(), oxygen(100), metal(50), experience(0) {}
+
+    Player(string name, int oxy, int mtl)
+        : Entity(name), oxygen(oxy), metal(mtl), experience(0) {}
+
+    int getMetal() const {
+        return metal;
+    }
+
+    int getOxygen() const {
+        return oxygen;
+    }
+
+    void displayPlayerInfo() const {
+        cout << "Imie gracza: " << getName() << "\n"
+            << "Zdrowie: " << getHealth() << "\n"
+            << "Tlen: " << oxygen << "\n"
+            << "Doswiadczenie: " << experience << "\n";
+    }
+
+    void rest() {
+        addHealth(10);
+        oxygen -= 5;
+        if (oxygen > 100) oxygen = 100;
+    }
+
+    void lowerOxygen(int amount) {
+        if (amount < 0) { amount *= -1; }
+        oxygen -= amount;
+        if (oxygen < 0) { oxygen = 0; }
+    }
+
+    void addOxygen(int amount) {
+        if (amount < 0) { amount *= -1; }
+        oxygen += amount;
+    }
+
+    void addMetal(int amount) {
+        if (amount < 0) { amount *= -1; }
+        metal += amount;
+    }
+
+    void addExperience(int xp) {
+        if (xp > 0) {
+            experience += xp;
+        }
+    }
+
+    void awans() {
+        int choice;
+        cout << "Wybierz opcje:" << endl;
+        cout << "[1] Zwieksz maksymalne zdrowie o 10 | " << hpPrice << " xp" << endl;
+        cout << "[2] Zwieksz obrazenia o 10 | " << dmgPrice << " xp" << endl;
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            if (experience < hpPrice) {
+                cout << "Masz za malo punktow doswiadczenia." << endl;
+            }
+            else {
+                addMaxHealth(10);
+                experience -= hpPrice;
+                hpPrice += 2;
+            }
+            break;
+
+        case 2:
+            if (experience < dmgPrice) {
+                cout << "Masz za malo punktow doswiadczenia." << endl;
+            }
+            else {
+                addDamage(10);
+                experience -= dmgPrice;
+                dmgPrice += 2;
+            }
+            break;
+
+        default:
+            cout << "Niepoprawny wybor." << endl;
+            break;
+        }
+        cout << endl;
+    }
+};
+
+class Game {
+private:
+    Player player;
+
+public:
+    Game(string playerName) : player(playerName, 100, 0) {}
+
+    void startGame() {
+        cout << "-------------------------------------" << endl;
+        cout << "Rozbiles sie na Ksiezycu!" << endl;
+        cout << "Twoim zadaniem jest przetrwanie i zdobycie wystarczajaco duzo surowcow, by zbudowac statek do domu." << endl;
+        cout << "Uwazaj na zapasy swojego tlenu, bez niego nie mozesz kontynuowac gry." << endl;
+        cout << "Powodzenia!" << endl;
+        cout << "-------------------------------------" << endl;
+
+        bool isGameRunning = true;
+        char playerChoice;
+
+        player.displayPlayerInfo();
+
+        while (isGameRunning) {
+            printMainMenu();
+            cin >> playerChoice;
+            switch (playerChoice) {
+            case '1':
+                player.displayPlayerInfo();
+                break;
+            case '2':
+                player.rest();
+                break;
+            case '3':
+                cout << "do implementacji\n";
+                break;
+            case '4':
+                if (player.getMetal() >= 50) {
+                    cout << "Gracz wygrywa!" << endl;
+                    cout << "Pomyslnie zbudowales statek i wydostales sie z ksiezyca!" << endl;
+                    cout << "Dzieki za gre!" << endl;
+                    isGameRunning = false;
+                }
+                break;
+            case '5':
+                void awans();
+                break;
+            case '0':
+                cout << "Koniec gry\n";
+                isGameRunning = false;
+                break;
+            default:
+                cout << "Niepoprawny wybor\n";
+                break;
+            }
+        }
+    }
+
+    void printMainMenu() {
+        cout << "-------------------------------------" << endl;
+        cout << "Co chcesz zrobic?\n";
+        cout << "1. Sprawdz swoj stan.\n";
+        cout << "2. Odpocznij.\n";
+        cout << "3. Szukaj zasobow.\n";
+        if (player.getMetal() > 50) {
+            cout << "4. Zbuduj statek.\n";
+        }
+        cout << "5. Leweluj\n";
+        cout << "0. Skoncz gre!\n";
+        cout << "-------------------------------------" << endl;
+    }
+};
+
+int main() {
+    Game game("Gracz");
+    game.startGame();
+
+    return 0;
+}
