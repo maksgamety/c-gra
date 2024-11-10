@@ -1,0 +1,302 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstdlib>
+#include <random>
+
+using namespace std;
+
+class Entity
+{
+private:
+
+    string name;
+    int health;
+    int maxHealth;
+    int damage;
+
+public:
+
+    Entity(string entityName)
+    {
+        name = entityName;
+        maxHealth = 10;
+        health = maxHealth;
+        damage = 2;
+    }
+
+    string get_name()
+    {
+        return name;
+    }
+
+    int get_health()
+    {
+        return health;
+    }
+
+    int get_max_health()
+    {
+        return maxHealth;
+    }
+
+    int get_damage()
+    {
+        return damage;
+    }
+
+    void lower_health(int value)
+    {
+        health -= value;
+        if (health < 0)
+        {
+            health = 0;
+        }
+    }
+    void add_health(int value)
+    {
+        health += value;
+        if (health > maxHealth)
+        {
+            health = maxHealth;
+        }
+    }
+};
+
+class Player : public Entity
+{
+private:
+
+    int metal;
+    int oxygen;
+
+public:
+
+    Player(string playerName) : Entity(playerName)
+    {
+        metal = 0;
+        oxygen = 100;
+    }
+
+    Player() : Entity("John")
+    {
+
+    }
+
+    int get_metal()
+    {
+        return metal;
+    }
+
+    int get_oxygen()
+    {
+        return oxygen;
+    }
+
+    void display_player_info()
+    {
+        cout << "Stan gracza" << endl;
+        cout << "------------------------------------------------" << endl;
+        cout << "Zycie: " << get_health() << "/" << get_max_health() << endl;
+        cout << "Atak: " << get_damage() << endl;
+        cout << "Tlen: " << oxygen << "%" << endl;
+        cout << "Metal: " << metal << "/50" << endl;
+        cout << "------------------------------------------------" << endl;
+    }
+
+    void rest()
+    {
+        cout << get_name() << " odpoczywa. Zuzycie 2% tlenu." << endl << endl;
+        lower_oxygen(2);
+        add_health(5);
+        display_player_info();
+    }
+
+    void lower_oxygen(int value)
+    {
+        oxygen -= value;
+    }
+
+    void add_oxygen(int value)
+    {
+        if (oxygen + value > 100)
+        {
+            oxygen = 100;
+        }
+        else
+        {
+            oxygen += value;
+        }
+    }
+
+    void add_metal(int value)
+    {
+        metal += value;
+    }
+};
+
+class Game
+{
+private:
+
+    Player player;
+
+public:
+    Game(string playerName)
+    {
+        player = Player(playerName);
+        cout << player.get_name() << endl;
+    }
+    void print_main_menu()
+    {
+        cout << "Co chcesz zrobic?" << endl;
+        cout << "--------------------------------------" << endl;
+        cout << "[1] Sprawdz swoj stan." << endl;
+        cout << "[2] Odpocznij." << endl;
+        cout << "[3] Szukaj zasobow." << endl;
+        if (player.get_metal() >= 50)
+        {
+            cout << "[4] Zbuduj statek." << endl;
+        }
+        cout << "[0] Koniec gry." << endl;
+    }
+    void start_game()
+    {
+        //Menu powitalne
+        cout << "--------------------------------------" << endl;
+        cout << "Rozbiles sie na niezbadanej planecie!" << endl;
+        cout << "Twoim zadaniem jest przetrwanie oraz zgromadzenie odpowiedniej ilosci surowcow, aby naprawic statek i wyruszyc w droge powrotna do domu." << endl;
+        cout << "Uwaga na zapasy tlenu, bez niego nie przezyjesz za dlugo." << endl;
+        cout << "Powodzenia " << player.get_name() << "!" << endl << endl;
+
+        player.display_player_info();
+        bool gameRunning = true;
+        int playerChoice;
+
+        while (gameRunning)
+        {
+            print_main_menu();
+            cout << "Wpisz numer: ";
+            cin >> playerChoice;
+            switch (playerChoice)
+            {
+            case 0:
+                cout << "Koniec gry! " << endl;
+                gameRunning = false;
+                break;
+            case 1:
+                player.display_player_info();
+                break;
+            case 2:
+                player.rest();
+                break;
+            case 3:
+                search_resources();
+                if (player.get_health() <= 0)
+                {
+                    cout << "Gracz przegrywa!" << endl;
+                    cout << "Gra zakonczona! Sprobuj ponownie :) " << endl;
+                    gameRunning = false;
+                }
+                break;
+            case 4:
+                if (player.get_metal() >= 50)
+                {
+                    cout << "Gracz wygrywa!" << endl;
+                    cout << "Brawo! Pomyślnie zbudowales statek i mozesz wracac na swoja planete! " << endl;
+                    cout << "Dzieki za gre! " << endl;
+                }
+                else
+                {
+                    cout << "Nie masz wystarczajacej liczby zasobow, aby zbudowac statek." << endl;
+                }
+                break;
+            }
+        }
+    }
+    void search_resources()
+    {
+        cout << player.get_name() << " wybiera sie na zewnatrz, w celu poszukiwania zasobow. Zuzycie tlenu 5%." << endl;
+        player.lower_oxygen(5);
+        cout << "--------------------------------------" << endl;
+        int encounter = rand() % 3;
+        switch (encounter) {
+        case 0:
+            cout << player.get_name() << " ma szczescie. natrafil na maly zbiornik tlenu!" << endl;
+            cout << "zasoby tlenu gracza zostala zwiekszone 0 7%" << endl;
+            player.add_oxygen(7);
+            player.display_player_info();
+            break;
+        case 1:
+            cout << player.get_name() << "natrafilna zloze metalu!" << endl;
+            cout << "zasoby gracza zostaly zwiekszone o 5%" << endl;
+            player.add_metal(5);
+            player.display_player_info();
+            break;
+        case 2:
+            cout << "gracz zastal potwora" << endl;
+            start_combat();
+        default:
+            break;
+        }
+    }
+    void start_combat() 
+    {
+        Entity enemy = Entity("kosmita");
+        bool combatRunning = true;
+        int playerDamage, enemyDamage;
+        char choice;
+        while (combatRunning) 
+        {
+            cout << "co chcesz zrobic?" << endl;
+            cout << "twoje zycie" << player.get_health() << endl;
+            cout << "zycie pszeciwnika" << enemy.get_health() << endl;
+            cout << "1. atakuj " << endl;
+            cout << "2. uciekaj " << endl;
+            cout << "wpisz numer" << endl;
+            cin >> choice;
+            switch (choice)
+            {
+            case '1':
+                playerDamage = rand() & player.get_damage() + 1;
+                cout << player.get_name() << " atakuje rani pszeciwnika o " << playerDamage << " puntow " << endl;
+                enemy.lower_health(playerDamage);
+                if (enemy.get_health() > 0) {
+                    enemyDamage = rand() % enemy.get_damage() + 1;
+                    cout << enemy.get_name() << " atakujie rani bochatera o " << enemyDamage << " punktow." << endl;
+                    if (player.get_health() <= 0)
+                    {
+                        cout << player.get_name() << " pszegrywa. koniec walki" << endl;
+                        combatRunning = false;
+                    }
+                }
+                else
+                {
+                    cout << player.get_name() << " pszegrywa. koniec walki" << endl;
+                    cout << player.get_name() << " znalazl zloze metalu. zyskuje 10 metalu" << endl;
+                    player.add_metal(10);
+                    combatRunning = false;
+                }
+                break;
+            case '2':
+                cout << player.get_name() << " ucieka tracac pszy tym kolejne 5% tlenu koniec walki" << endl;
+                player.add_oxygen(5);
+                combatRunning = false;
+                break;
+            default:
+                break;
+            }
+        }
+    }
+};
+
+int main()
+{
+    cout << "Witaj w mojej grze o nazwie SpaceRescue!" << endl;
+    string name;
+    cout << "Wprowadz nazwe gracza: ";
+    cin >> name;
+    Game game = Game(name);
+    game.start_game();
+    return 0;
+}
